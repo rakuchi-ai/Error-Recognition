@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>正誤問題</title>
+<style>
+:root{--bg:#f3f5f4;--card:#fff;--tx:#1c2523;--mut:#66726f;--bd:#d8dedc;--board:#1f3a34;--chalk:#f2f4ef;--hi:#e8c547;--ok:#23804f;--ng:#c0392b;--sel:#1f3a34;--selx:#f2f4ef}
+@media(prefers-color-scheme:dark){:root{--bg:#121816;--card:#1a2220;--tx:#e6ebe9;--mut:#93a09c;--bd:#2c3835;--board:#0f1f1b;--chalk:#eef1ec;--ok:#46c07f;--ng:#ff7b6e;--sel:#e8c547;--selx:#14201d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.7 "Hiragino Sans","Yu Gothic","Noto Sans JP",system-ui,sans-serif}
+header{background:var(--board);color:var(--chalk);padding:18px 16px 14px;border-bottom:5px solid var(--hi)}
+header h1{margin:0;font-size:26px;letter-spacing:.1em;font-weight:700}
+header p{margin:2px 0 0;font-size:13px;opacity:.8}
+main{max-width:720px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px;margin-bottom:14px}
+h2{font-size:15px;margin:0 0 10px;color:var(--mut);font-weight:700}
+button{font:inherit;color:inherit}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+.range{padding:10px 6px;border:1.5px solid var(--bd);background:var(--card);border-radius:8px;cursor:pointer;line-height:1.4}
+.range:hover{border-color:var(--sel)}
+.range small{display:block;font-size:12px;color:var(--mut)}
+.wide{display:flex;justify-content:space-between;align-items:center;width:100%;padding:14px 16px;border:1.5px solid var(--sel);background:var(--card);border-radius:10px;cursor:pointer;font-weight:700}
+.wide:disabled{opacity:.4;cursor:not-allowed}
+.go{width:100%;padding:14px;border:0;border-radius:10px;background:var(--board);color:var(--chalk);font-size:18px;font-weight:700;cursor:pointer;border-bottom:4px solid var(--hi)}
+.link{background:none;border:0;color:var(--mut);text-decoration:underline;cursor:pointer;padding:6px 0}
+.bar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;font-size:14px;color:var(--mut)}
+.bar button{padding:6px 12px;border:1.5px solid var(--bd);background:var(--card);border-radius:8px;cursor:pointer}
+.prog{height:6px;background:var(--bd);border-radius:3px;margin-bottom:14px;overflow:hidden}
+.prog i{display:block;height:100%;background:var(--hi)}
+.unit{font-size:12px;color:var(--mut);margin-bottom:6px}
+.q{font:20px/2.1 Georgia,"Times New Roman",serif;word-break:break-word;margin:0 0 14px}
+.q u{text-decoration-thickness:2px;text-underline-offset:5px;border-radius:3px}
+.q [data-n]{cursor:pointer}
+.q .n{color:var(--mut);font:14px system-ui;margin-right:1px}
+.q u.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,transparent);font-weight:700}
+.q u.ng{color:var(--ng);background:color-mix(in srgb,var(--ng) 14%,transparent);text-decoration-style:wavy}
+.nums{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nums button{padding:12px 0;font-size:22px;border:1.5px solid var(--bd);background:var(--card);border-radius:8px;cursor:pointer}
+.nums button:disabled{cursor:default;opacity:.55}
+.nums button.ok{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 16%,transparent);opacity:1}
+.nums button.ng{border-color:var(--ng);background:color-mix(in srgb,var(--ng) 14%,transparent);opacity:1}
+.fb{margin-top:14px;padding:12px 14px;border-radius:8px;border-left:6px solid var(--ok);background:color-mix(in srgb,var(--ok) 10%,transparent)}
+.fb.bad{border-color:var(--ng);background:color-mix(in srgb,var(--ng) 10%,transparent)}
+.fb h3{margin:0 0 4px;font-size:18px}
+.ex{white-space:pre-wrap;margin:6px 0 0;font-size:17px}
+.sub{font-size:12px;color:var(--mut);margin:4px 0}
+.acts{display:flex;gap:8px;margin-top:12px}
+.acts button{flex:1;padding:12px;border-radius:8px;border:1.5px solid var(--bd);background:var(--card);cursor:pointer}
+.acts .next{background:var(--board);color:var(--chalk);border-color:var(--board);font-weight:700}
+.acts .st.on{background:var(--hi);color:#2a2200;border-color:var(--hi);font-weight:700}
+.big{font-size:44px;font-weight:700;text-align:center;margin:6px 0}
+.m{display:flex;align-items:center;gap:8px;font-size:15px;margin:8px 0}.m span{width:4em;color:var(--mut)}.m .t{flex:1;height:12px;background:var(--bd);border-radius:6px;overflow:hidden}.m .t i{display:block;height:100%}.m b{width:3.4em;text-align:right}
+.msg{padding:14px;border:1.5px dashed var(--ng);border-radius:8px}
+:focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><h1 id="ttl">正誤問題</h1><p id="sub"></p></header>
+<main id="app"></main>
+<script>
+const CSV_FILE='questions.csv';          // 問題を差し替えるときは、このCSVを入れ替える
+const CIRC='①②③④⑤⑥⑦⑧⑨⑩', STEP=10;
+let ALL=[], Q=null, LSK='seigo_v1', st={stock:[],rec:{}};
+const $=s=>document.querySelector(s), app=$('#app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const loadSt=()=>{try{return Object.assign({stock:[],rec:{}},JSON.parse(localStorage.getItem(LSK)))}catch(e){return{stock:[],rec:{}}}};
+const save=()=>{try{localStorage.setItem(LSK,JSON.stringify(st))}catch(e){}};
+const grp=q=>Math.floor((q.no-1)/STEP);
+
+function parseCSV(t){
+  t=t.replace(/^\uFEFF/,'');const rows=[];let r=[],f='',q=false;
+  for(let i=0;i<t.length;i++){const c=t[i];
+    if(q){if(c=='"'){if(t[i+1]=='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c=='"')q=true;
+    else if(c==','){r.push(f);f=''}
+    else if(c=='\n'||c=='\r'){if(c=='\r'&&t[i+1]=='\n')i++;r.push(f);f='';if(r.length>1||r[0]!=='')rows.push(r);r=[]}
+    else f+=c}
+  if(f!==''||r.length){r.push(f);rows.push(r)}
+  const h=rows.shift().map(x=>x.trim());
+  return rows.map(x=>{const o={};h.forEach((k,i)=>o[k]=x[i]??'');return o});
+}
+function setData(text){
+  const rows=parseCSV(text).filter(o=>(o['問題']||'').trim());
+  const first=k=>{const r=rows.find(o=>(o[k]||'').trim());return r?r[k].trim():''};
+  const title=first('アプリ名')||'正誤問題';
+  ALL=[];const used=new Set();
+  rows.forEach((o,i)=>{
+    let no=parseInt(o['No'],10);if(!isFinite(no)||used.has(no))no=100000+i;used.add(no);
+    const q=o['問題'].replace(/\r\n?/g,'\n'), a=(o['正解']||'').trim();
+    const nums=[...q.matchAll(/([①-⑩])<u>/g)].map(m=>m[1]);
+    if(!nums.includes(a))return;                      // 正解が問題文の番号にない行は除外
+    ALL.push({no,q,a,nums,ex:o['解説']||''});
+  });
+  ALL.sort((x,y)=>x.no-y.no);
+  LSK=title=='発展1100 正誤問題'?'seigo_v1':'seigo_v1_'+title;   // アプリ名ごとに記録を分ける
+  st=loadSt();
+  document.title=title;$('#ttl').textContent=title;$('#sub').textContent=first('サブタイトル');
+  home();
+}
+function init(){
+  fetch(CSV_FILE,{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.text()}).then(setData).catch(()=>{
+    app.innerHTML=`<div class="msg"><b>${esc(CSV_FILE)} を読み込めませんでした。</b><p>index.html と同じフォルダにCSVを置き、GitHub Pagesなどのサーバー経由で開いてください。ファイルを直接開いている場合は、下のボタンからCSVを選べます。</p><input type="file" id="f" accept=".csv"></div>`;
+    $('#f').onchange=e=>{const fr=new FileReader();fr.onload=()=>setData(fr.result);fr.readAsText(e.target.files[0],'utf-8')};
+  });
+}
+
+/* ---------- ホーム ---------- */
+function home(){
+  Q=null;
+  const gs=[...new Set(ALL.map(grp))];
+  const stockN=ALL.filter(q=>st.stock.includes(q.no)).length;
+  app.innerHTML=`
+  <div class="card"><h2>演習範囲(${STEP}問ずつ)</h2><div class="grid">${gs.map(g=>{
+    const qs=ALL.filter(q=>grp(q)==g), ok=qs.filter(q=>st.rec[q.no]=='c').length;
+    return `<button class="range" data-g="${g}">${qs[0].no}–${qs[qs.length-1].no}<small>正答 ${ok}/${qs.length}</small></button>`}).join('')}</div></div>
+  <button class="wide" id="stock" ${stockN?'':'disabled'}><span>ストック問題で復習</span><span>${stockN}問</span></button>
+  <p style="text-align:center"><button class="link" id="rec">あなたの記録</button></p>`;
+  app.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>start(ALL.filter(q=>grp(q)==+b.dataset.g)));
+  $('#stock').onclick=()=>start(ALL.filter(q=>st.stock.includes(q.no)));
+  $('#rec').onclick=recView;
+}
+
+/* ---------- 演習 ---------- */
+function start(list){if(!list.length)return;Q={list,i:0,ok:0,pick:null,done:false,res:null,t:0};show()}
+function quit(){if(confirm('演習をやめてホームに戻りますか?\n(ここまでの正誤は保存されます)'))home()}
+function qHtml(q){
+  const re=/([①-⑩])<u>([\s\S]*?)<\/u>/g;let out='',last=0,m;
+  while(m=re.exec(q.q)){
+    out+=esc(q.q.slice(last,m.index));
+    let cls='';if(Q.done){if(m[1]===q.a)cls='ok';else if(m[1]===Q.pick)cls='ng'}
+    out+=`<span data-n="${m[1]}"><span class="n">${m[1]}</span><u class="${cls}">${esc(m[2])}</u></span>`;
+    last=re.lastIndex;
+  }
+  return out+esc(q.q.slice(last));
+}
+function show(){
+  const q=Q.list[Q.i], total=Q.list.length;
+  app.innerHTML=`
+  <div class="bar"><span>${Q.i+1} / ${total}問 ・ 正解 ${Q.ok}</span><button id="quit">ホームに戻る</button></div>
+  <div class="prog"><i style="width:${Q.i/total*100}%"></i></div>
+  <div class="card"><div class="unit">No.${q.no}　下線部のうち誤りのある箇所の番号を選びなさい</div>
+  <p class="q">${qHtml(q)}</p>
+  <div class="nums">${q.nums.map(n=>`<button data-n="${n}" class="${Q.done?(n===q.a?'ok':n===Q.pick?'ng':''):''}" ${Q.done?'disabled':''}>${n}</button>`).join('')}</div>
+  <div id="fb"></div></div>`;
+  $('#quit').onclick=quit;
+  if(!Q.done)app.querySelectorAll('[data-n]').forEach(b=>b.onclick=()=>answer(b.dataset.n));
+  else feedback();
+}
+function answer(n){
+  if(Q.done)return;const q=Q.list[Q.i], ok=n===q.a;
+  Q.pick=n;Q.done=true;Q.res=ok;Q.t=Date.now();
+  st.rec[q.no]=ok?'c':'x';
+  if(ok)Q.ok++;else if(!st.stock.includes(q.no))st.stock.push(q.no);   // 間違いは自動ストック
+  save();show();
+}
+function feedback(){
+  const q=Q.list[Q.i], ok=Q.res, last=Q.i==Q.list.length-1;
+  const lbl=()=>st.stock.includes(q.no)?'★ ストック済み(タップで外す)':'☆ 自信がない:ストックに追加';
+  $('#fb').innerHTML=`<div class="fb${ok?'':' bad'}"><h3>${ok?'◯ 正解':'✕ 不正解'}　正解:${esc(q.a)}</h3>
+    <p class="ex">${esc(q.ex)}</p>${ok?'':'<p class="sub">この問題をストックしました。</p>'}</div>
+    <div class="acts"><button class="st${st.stock.includes(q.no)?' on':''}" id="stk">${lbl()}</button><button class="next" id="nx">${last?'結果を見る':'次の問題'}</button></div>`;
+  $('#stk').onclick=e=>{
+    st.stock=st.stock.includes(q.no)?st.stock.filter(n=>n!==q.no):[...st.stock,q.no];
+    if(ok)st.rec[q.no]=st.stock.includes(q.no)?'u':'c';   // 正解でも自信がなければ正答に数えない
+    save();e.target.classList.toggle('on',st.stock.includes(q.no));e.target.textContent=lbl();
+  };
+  $('#nx').onclick=next;
+}
+function next(){if(Q.i<Q.list.length-1){Q.i++;Q.pick=null;Q.done=false;show();scrollTo(0,0)}else result()}
+function result(){
+  const t=Q.list.length;
+  app.innerHTML=`<div class="card"><h2>結果</h2><div class="big">${Q.ok} / ${t}</div><p style="text-align:center;margin:0">正答率 ${Math.round(Q.ok/t*100)}%</p>
+  <p class="sub" style="text-align:center">ストック中の問題:${st.stock.length}問</p></div><button class="go" id="h">ホームに戻る</button>`;
+  $('#h').onclick=home;scrollTo(0,0);
+}
+document.addEventListener('keydown',e=>{
+  if(!Q||e.metaKey||e.ctrlKey||e.isComposing)return;
+  if(Q.done){if(e.key=='Enter'&&Date.now()-Q.t>400){const n=$('#nx');if(n){e.preventDefault();n.click()}}}
+  else if(/^[1-9]$/.test(e.key)){const n=Q.list[Q.i].nums[+e.key-1];if(n)answer(n)}
+});
+
+/* ---------- あなたの記録(全問題) ---------- */
+function recView(){
+  Q=null;
+  const total=ALL.length, tried=ALL.filter(q=>st.rec[q.no]).length, ok=ALL.filter(q=>st.rec[q.no]=='c').length;
+  const pct=(a,b)=>b?Math.round(a/b*100):null;
+  const meter=(l,v,c)=>`<div class="m"><span>${l}</span><div class="t"><i style="width:${v||0}%;background:${c}"></i></div><b>${v==null?'—':v+'%'}</b></div>`;
+  app.innerHTML=`<div class="bar"><span>あなたの記録</span><button id="b">ホームに戻る</button></div>
+  <div class="card"><h2>全${total}問</h2>${meter('達成率',pct(ok,total),'var(--hi)')}${meter('正答率',pct(ok,tried),'var(--ok)')}
+    <p class="sub">正答 ${ok}問 / 全${total}問 ・ 演習済み ${tried}問 ・ ストック ${st.stock.length}問</p></div>
+  <div class="card"><h2>達成率・正答率とは</h2>
+    <p class="sub"><b>達成率</b>=全${total}問のうち、正答した問題の割合</p>
+    <p class="sub"><b>正答率</b>=演習した問題のうち、正答した問題の割合</p>
+    <p class="sub">各問題の「最新の解答」で数えます(間違えた問題を後で正解すれば正答になります)。正解でも「自信がない」としてストックした問題は、正答に数えません。ストック問題に正解すると正答扱いになります。</p></div>
+  <p style="text-align:center"><button class="link" id="reset">記録をリセットする</button></p>`;
+  $('#b').onclick=home;
+  $('#reset').onclick=()=>{if(confirm('達成率・正答率の記録をリセットします(ストックは残ります)。よろしいですか?')){st.rec={};save();recView()}};
+  scrollTo(0,0);
+}
+init();
+</script>
+</body>
+</html>
