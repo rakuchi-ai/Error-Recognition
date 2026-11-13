@@ -93,7 +93,7 @@ function setData(text){
     ALL.push({no,q,a,nums,ex:o['解説']||''});
   });
   ALL.sort((x,y)=>x.no-y.no);
-  LSK=title=='発展1100 正誤問題'?'seigo_v1':'seigo_v1_'+title;   // アプリ名ごとに記録を分ける
+  LSK=title=='正誤問題強化100'?'seigo_v1':'seigo_v1_'+title;   // アプリ名ごとに記録を分ける
   st=loadSt();
   document.title=title;$('#ttl').textContent=title;$('#sub').textContent=first('サブタイトル');
   home();
