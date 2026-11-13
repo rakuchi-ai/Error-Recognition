@@ -53,11 +53,32 @@ button{font:inherit;color:inherit}
 .m{display:flex;align-items:center;gap:8px;font-size:15px;margin:8px 0}.m span{width:4em;color:var(--mut)}.m .t{flex:1;height:12px;background:var(--bd);border-radius:6px;overflow:hidden}.m .t i{display:block;height:100%}.m b{width:3.4em;text-align:right}
 .msg{padding:14px;border:1.5px dashed var(--ng);border-radius:8px}
 :focus-visible{outline:3px solid var(--hi);outline-offset:2px}
+    .back-portal-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+        background-color: #f1f5f9;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .back-portal-link:hover {
+        background-color: #e2e8f0;
+        color: #1e293b;
+    }
 </style>
 </head>
 <body>
 <header><h1 id="ttl">正誤問題</h1><p id="sub"></p></header>
 <main id="app"></main>
+  <a href="https://rakuchi-ai.github.io/ENGLISH-TOP/" class="back-portal-link">
+    &larr; ポータルに戻る
+</a>
 <script>
 const CSV_FILE='questions.csv';          // 問題を差し替えるときは、このCSVを入れ替える
 const CIRC='①②③④⑤⑥⑦⑧⑨⑩', STEP=10;
